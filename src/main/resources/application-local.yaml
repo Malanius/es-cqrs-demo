@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:2345/esdb
+    username: esdb
+    password: esdb

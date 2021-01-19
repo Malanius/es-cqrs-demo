@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:alpine
+    container_name: ec-db
+    ports:
+      - "2345:5432"
+    environment:
+      POSTGRES_USER: esdb
+      POSTGRES_PASSWORD: esdb
+      POSTGRES_DB: esdb

@@ -1,0 +1,36 @@
+server:
+  shutdown: graceful
+  servlet:
+    context-path: /api/
+
+spring:
+  main:
+    banner-mode: off
+  jpa:
+    database: default
+    generate-ddl: false
+    open-in-view: false
+    hibernate:
+      use-new-id-generator-mappings: true
+    properties:
+      hibernate.cache.use_second_level_cache: false
+      hibernate.generate_statistics: false
+      hibernate.default_schema: public
+      hibernate.format_sql: true
+    show-sql: ${SHOW_SQL:false}
+  datasource:
+    hikari:
+      maximum-pool-size: 15
+      connection-timeout: 10000
+      initialization-fail-timeout: 60000
+    driver-class-name: org.postgresql.Driver
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+  lifecycle:
+    timeout-per-shutdown-phase: 10s
+  servlet:
+    multipart:
+      file-size-threshold: 2KB
+      max-file-size: 1GB
+      max-request-size: 1GB

@@ -12,16 +12,16 @@ import java.util.Set;
 public class UserRepository {
     private final Map<String, User> store = new HashMap<>();
 
-    public User getUSer(String userId) {
+    public User getUser(String userId) {
         return store.get(userId);
     }
 
     public void saveUser(User user) {
-        store.put(user.getUserid(), user);
+        store.put(user.getUserId().toString(), user);
     }
 
     public void removeUser(User user) {
-        store.remove(user.getUserid());
+        store.remove(user.getUserId());
     }
 
     public Set<User> getUsers() {

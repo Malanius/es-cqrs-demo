@@ -4,12 +4,13 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Data
 @Builder
 public class User {
 
-    private String userid;
+    private UUID userId;
     private String firstName;
     private String lastName;
     private Set<Contact> contacts;

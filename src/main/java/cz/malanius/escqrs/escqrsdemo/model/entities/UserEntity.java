@@ -1,4 +1,4 @@
-package cz.malanius.escqrs.escqrsdemo.model;
+package cz.malanius.escqrs.escqrsdemo.model.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class UserEntity {
 
     @Id
     @Column(name = "id")
@@ -31,11 +31,11 @@ public class User {
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Column(name = "contacts")
-    private Set<Contact> contacts;
+    private Set<ContactEntity> contacts;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Column(name = "adresses")
-    private Set<Address> addresses;
+    private Set<AddressEntity> addresses;
 
 }
 

@@ -21,25 +21,38 @@ public class UserService {
         this.repository = repository;
     }
 
-    public String createUser(String firstName, String lastName) {
+    public Set<User> getAllUsers(){
+        return repository.getUsers();
+    }
+
+    public User createUser(String firstName, String lastName) {
         User user = User.builder()
                 .userId(UUID.randomUUID())
                 .firstName(firstName)
                 .lastName(lastName)
                 .build();
         repository.saveUser(user);
-        return user.getUserId().toString();
+        return user;
     }
 
     public User getUser(String userId) {
         return repository.getUser(userId);
     }
 
-    public void updateUser(String userId, Set<Contact> contacts, Set<Address> addresses) {
+    public void deleteUSer(String userId){
+        repository.removeUser(userId);
+    }
+
+    public User updateUserAddresses(String userId, Set<Address> addresses) {
+        User user = repository.getUser(userId);
+        user.setAddresses(addresses);
+        return repository.saveUser(user);
+    }
+
+    public User updateUserContacts(String userId, Set<Contact> contacts) {
         User user = repository.getUser(userId);
         user.setContacts(contacts);
-        user.setAddresses(addresses);
-        repository.saveUser(user);
+        return repository.saveUser(user);
     }
 
     public Set<Contact> getContactByType(String userId, String contactType) {

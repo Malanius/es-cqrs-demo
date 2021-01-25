@@ -16,12 +16,13 @@ public class UserRepository {
         return store.get(userId);
     }
 
-    public void saveUser(User user) {
+    public User saveUser(User user) {
         store.put(user.getUserId().toString(), user);
+        return user;
     }
 
-    public void removeUser(User user) {
-        store.remove(user.getUserId());
+    public void removeUser(String userId) {
+        store.remove(userId);
     }
 
     public Set<User> getUsers() {

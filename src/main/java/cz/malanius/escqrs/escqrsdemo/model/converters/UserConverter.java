@@ -11,12 +11,20 @@ import java.util.stream.Collectors;
 public class UserConverter {
 
     public static UserDTO convert(UserEntity entity) {
-        return UserDTO.builder()
+        UserDTO.UserDTOBuilder builder = UserDTO.builder()
                 .id(entity.getUserId())
                 .firstName(entity.getFirstName())
-                .lastName(entity.getLastName())
-                .addresses(entity.getAddresses().stream().map(AddressConverter::convert).collect(Collectors.toSet()))
-                .contacts(entity.getContacts().stream().map(ContactConverter::convert).collect(Collectors.toSet()))
-                .build();
+                .lastName(entity.getLastName());
+
+        if (entity.getAddresses() != null) {
+            builder.addresses(entity.getAddresses().stream()
+                    .map(AddressConverter::convert).collect(Collectors.toSet()));
+        }
+
+        if (entity.getContacts() != null) {
+            builder.contacts(entity.getContacts().stream()
+                    .map(ContactConverter::convert).collect(Collectors.toSet()));
+        }
+        return builder.build();
     }
 }

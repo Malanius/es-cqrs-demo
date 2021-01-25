@@ -1,8 +1,15 @@
 package cz.malanius.escqrs.escqrsdemo.rest;
 
-import cz.malanius.escqrs.escqrsdemo.model.Address;
-import cz.malanius.escqrs.escqrsdemo.model.Contact;
-import cz.malanius.escqrs.escqrsdemo.model.User;
+import cz.malanius.escqrs.escqrsdemo.aggregates.UserAggregate;
+import cz.malanius.escqrs.escqrsdemo.commands.CreateUserCommand;
+import cz.malanius.escqrs.escqrsdemo.commands.DeleteUserCommand;
+import cz.malanius.escqrs.escqrsdemo.commands.UpdateUserCommand;
+import cz.malanius.escqrs.escqrsdemo.model.dto.AddressDTO;
+import cz.malanius.escqrs.escqrsdemo.model.dto.ContactDTO;
+import cz.malanius.escqrs.escqrsdemo.model.dto.UserDTO;
+import cz.malanius.escqrs.escqrsdemo.model.entities.AddressEntity;
+import cz.malanius.escqrs.escqrsdemo.model.entities.ContactEntity;
+import cz.malanius.escqrs.escqrsdemo.model.entities.UserEntity;
 import cz.malanius.escqrs.escqrsdemo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,59 +24,72 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService users;
+    private final UserAggregate userAggregate;
 
     @Autowired
-    public UserController(UserService users) {
+    public UserController(UserService users, UserAggregate userAggregate) {
         this.users = users;
+        this.userAggregate = userAggregate;
     }
 
     @GetMapping
-    public Set<User> listUsers() {
+    public Set<UserEntity> listUsers() {
         return users.getAllUsers();
     }
 
     @PostMapping("/user")
-    public User createUser(@RequestBody User user) {
-        return users.createUser(user.getFirstName(), user.getLastName());
+    public UserDTO createUser(@RequestBody UserDTO user) {
+        CreateUserCommand command = CreateUserCommand.builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .build();
+        return userAggregate.handleCreateUserCommand(command);
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<User> getUser(@PathVariable String id) {
-        Optional<User> maybeUser = users.getUser(UUID.fromString(id));
+    public ResponseEntity<UserEntity> getUser(@PathVariable UUID id) {
+        Optional<UserEntity> maybeUser = users.getUser(id);
         return maybeUser.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/user/{id}")
-    public void deleteUSer(@PathVariable String id) {
-        users.deleteUSer(UUID.fromString(id));
+    public void deleteUSer(@PathVariable UUID id) {
+        DeleteUserCommand command = DeleteUserCommand.builder()
+                .userId(id)
+                .build();
+        userAggregate.handleDeleteUserCommand(command);
     }
 
     @PostMapping("/user/{id}/addresses")
-    public ResponseEntity<User> addUserAddress(@PathVariable String id, @RequestBody Set<Address> addresses) {
-        Optional<User> maybeUser = users.getUser(UUID.fromString(id));
-        return maybeUser.map(user -> ResponseEntity.ok(users.addUserAddresses(user, addresses)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public UserDTO setUserAddress(@PathVariable UUID id, @RequestBody Set<AddressDTO> addresses) {
+        UpdateUserCommand command = UpdateUserCommand.builder()
+                .userId(id)
+                .addresses(addresses)
+                .build();
+        return userAggregate.handleUpdateUserCommand(command);
     }
 
     @PostMapping("/user/{id}/contacts")
-    public ResponseEntity<User> updateUserContacts(@PathVariable String id, @RequestBody Set<Contact> contacts) {
-        Optional<User> maybeUser = users.getUser(UUID.fromString(id));
-        return maybeUser.map(user -> ResponseEntity.ok(users.addUserContacts(user, contacts)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public UserDTO updateUserContacts(@PathVariable UUID id, @RequestBody Set<ContactDTO> contacts) {
+        UpdateUserCommand command = UpdateUserCommand.builder()
+                .userId(id)
+                .contacts(contacts)
+                .build();
+        return userAggregate.handleUpdateUserCommand(command);
     }
 
     @GetMapping("/user/{id}/contacts/{type}")
-    public ResponseEntity<Set<Contact>> getUserContactsOfType(@PathVariable String id, @PathVariable String type) {
-        Optional<User> maybeUser = users.getUser(UUID.fromString(id));
-        return maybeUser.map(user -> ResponseEntity.ok(users.getContactByType(user, type)))
+    public ResponseEntity<Set<ContactEntity>> getUserContactsOfType(@PathVariable UUID id, @PathVariable String type) {
+        Optional<UserEntity> maybeUser = users.getUser(id);
+        return maybeUser.map(userEntity -> ResponseEntity.ok(users.getContactByType(userEntity, type)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user/{id}/addresses/{region}")
-    public ResponseEntity<Set<Address>> getUserAddressesForRegion(@PathVariable String id, @PathVariable String region) {
-        Optional<User> maybeUser = users.getUser(UUID.fromString(id));
-        return maybeUser.map(user -> ResponseEntity.ok(users.getAddressByRegion(user, region)))
+    public ResponseEntity<Set<AddressEntity>> getUserAddressesForRegion(@PathVariable UUID id, @PathVariable String region) {
+        Optional<UserEntity> maybeUser = users.getUser(id);
+        return maybeUser.map(userEntity -> ResponseEntity.ok(users.getAddressByRegion(userEntity, region)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

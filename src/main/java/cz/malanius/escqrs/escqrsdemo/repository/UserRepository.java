@@ -1,31 +1,10 @@
 package cz.malanius.escqrs.escqrsdemo.repository;
 
 import cz.malanius.escqrs.escqrsdemo.model.User;
-import org.springframework.stereotype.Component;
+import org.springframework.data.repository.CrudRepository;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
 
-@Component
-public class UserRepository {
-    private final Map<String, User> store = new HashMap<>();
+public interface UserRepository extends CrudRepository<User, UUID> {
 
-    public User getUser(String userId) {
-        return store.get(userId);
-    }
-
-    public User saveUser(User user) {
-        store.put(user.getUserId().toString(), user);
-        return user;
-    }
-
-    public void removeUser(String userId) {
-        store.remove(userId);
-    }
-
-    public Set<User> getUsers() {
-        return new HashSet<>(store.values());
-    }
 }

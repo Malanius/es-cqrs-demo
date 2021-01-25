@@ -7,6 +7,8 @@ import cz.malanius.escqrs.escqrsdemo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -21,53 +23,51 @@ public class UserService {
         this.repository = repository;
     }
 
-    public Set<User> getAllUsers(){
-        return repository.getUsers();
+    public Set<User> getAllUsers() {
+        Iterable<User> allUsers = repository.findAll();
+        Set<User> users = new HashSet<>();
+        allUsers.forEach(users::add);
+        return users;
     }
 
     public User createUser(String firstName, String lastName) {
         User user = User.builder()
-                .userId(UUID.randomUUID())
                 .firstName(firstName)
                 .lastName(lastName)
                 .build();
-        repository.saveUser(user);
-        return user;
+        return repository.save(user);
     }
 
-    public User getUser(String userId) {
-        return repository.getUser(userId);
+    public Optional<User> getUser(UUID userId) {
+        return repository.findById(userId);
     }
 
-    public void deleteUSer(String userId){
-        repository.removeUser(userId);
+    public void deleteUSer(UUID userId) {
+        repository.deleteById(userId);
     }
 
-    public User updateUserAddresses(String userId, Set<Address> addresses) {
-        User user = repository.getUser(userId);
-        user.setAddresses(addresses);
-        return repository.saveUser(user);
+    public User addUserAddresses(User user, Set<Address> addresses) {
+        addresses.forEach(a -> user.getAddresses().add(a));
+        return repository.save(user);
     }
 
-    public User updateUserContacts(String userId, Set<Contact> contacts) {
-        User user = repository.getUser(userId);
-        user.setContacts(contacts);
-        return repository.saveUser(user);
+    public User addUserContacts(User user, Set<Contact> contacts) {
+        contacts.forEach(c -> user.getContacts().add(c));
+        return repository.save(user);
     }
 
-    public Set<Contact> getContactByType(String userId, String contactType) {
-        User user = repository.getUser(userId);
+    public Set<Contact> getContactByType(User user, String contactType) {
         Set<Contact> contacts = user.getContacts();
         return contacts.stream()
                 .filter(c -> c.getType().equals(contactType))
                 .collect(Collectors.toSet());
     }
 
-    public Set<Address> getAddressByRegion(String userId, String state) {
-        User user = repository.getUser(userId);
+    public Set<Address> getAddressByRegion(User user, String state) {
         Set<Address> addresses = user.getAddresses();
         return addresses.stream()
                 .filter(a -> a.getState().equals(state))
                 .collect(Collectors.toSet());
     }
 }
+

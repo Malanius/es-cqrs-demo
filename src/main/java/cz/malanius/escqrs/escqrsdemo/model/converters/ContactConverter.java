@@ -10,8 +10,17 @@ public class ContactConverter {
 
     public static ContactDTO convert(ContactEntity entity) {
         return ContactDTO.builder()
+                .id(entity.getId())
                 .type(entity.getType())
                 .detail(entity.getDetail())
+                .build();
+    }
+
+    public static ContactEntity convert(ContactDTO dto) {
+        return ContactEntity.builder()
+                .id(dto.getId())
+                .type(dto.getType())
+                .detail(dto.getDetail())
                 .build();
     }
 }

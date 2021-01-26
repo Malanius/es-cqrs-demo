@@ -1,4 +1,4 @@
-package cz.malanius.escqrs.escqrsdemo.model;
+package cz.malanius.escqrs.escqrsdemo.model.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,21 +14,18 @@ import java.util.UUID;
 @NoArgsConstructor
 
 @Entity
-@Table(name = "adressess")
-public class Address {
+@Table(name = "contacts")
+public class ContactEntity {
 
     @Id
     @Column(name = "id")
     @GeneratedValue(generator = "uuid2")
     private UUID id;
 
-    @Column(name = "city")
-    private String city;
+    @Column(name = "type")
+    private String type;
 
-    @Column(name = "state")
-    private String state;
-
-    @Column(name = "post_code")
-    private String postcode;
+    @Column(name = "detail")
+    private String detail;
 
 }

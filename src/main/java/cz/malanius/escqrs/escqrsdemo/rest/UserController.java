@@ -7,9 +7,10 @@ import cz.malanius.escqrs.escqrsdemo.commands.UpdateUserCommand;
 import cz.malanius.escqrs.escqrsdemo.model.dto.AddressDTO;
 import cz.malanius.escqrs.escqrsdemo.model.dto.ContactDTO;
 import cz.malanius.escqrs.escqrsdemo.model.dto.UserDTO;
-import cz.malanius.escqrs.escqrsdemo.model.entities.AddressEntity;
-import cz.malanius.escqrs.escqrsdemo.model.entities.ContactEntity;
 import cz.malanius.escqrs.escqrsdemo.model.entities.UserEntity;
+import cz.malanius.escqrs.escqrsdemo.projections.UserProjection;
+import cz.malanius.escqrs.escqrsdemo.queries.AddressByRegionQuery;
+import cz.malanius.escqrs.escqrsdemo.queries.ContactByTypeQuery;
 import cz.malanius.escqrs.escqrsdemo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +26,13 @@ public class UserController {
 
     private final UserService users;
     private final UserAggregate userAggregate;
+    private final UserProjection userProjection;
 
     @Autowired
-    public UserController(UserService users, UserAggregate userAggregate) {
+    public UserController(UserService users, UserAggregate userAggregate, UserProjection userProjection) {
         this.users = users;
         this.userAggregate = userAggregate;
+        this.userProjection = userProjection;
     }
 
     @GetMapping
@@ -80,16 +83,20 @@ public class UserController {
     }
 
     @GetMapping("/user/{id}/contacts/{type}")
-    public ResponseEntity<Set<ContactEntity>> getUserContactsOfType(@PathVariable UUID id, @PathVariable String type) {
-        Optional<UserEntity> maybeUser = users.getUser(id);
-        return maybeUser.map(userEntity -> ResponseEntity.ok(users.getContactByType(userEntity, type)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public Set<ContactDTO> getUserContactsOfType(@PathVariable UUID id, @PathVariable String type) {
+        ContactByTypeQuery query = ContactByTypeQuery.builder()
+                .userId(id)
+                .contactType(type)
+                .build();
+        return userProjection.handle(query);
     }
 
     @GetMapping("/user/{id}/addresses/{region}")
-    public ResponseEntity<Set<AddressEntity>> getUserAddressesForRegion(@PathVariable UUID id, @PathVariable String region) {
-        Optional<UserEntity> maybeUser = users.getUser(id);
-        return maybeUser.map(userEntity -> ResponseEntity.ok(users.getAddressByRegion(userEntity, region)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public Set<AddressDTO> getUserAddressesForRegion(@PathVariable UUID id, @PathVariable String region) {
+        AddressByRegionQuery query = AddressByRegionQuery.builder()
+                .userId(id)
+                .state(region)
+                .build();
+        return userProjection.handle(query);
     }
 }

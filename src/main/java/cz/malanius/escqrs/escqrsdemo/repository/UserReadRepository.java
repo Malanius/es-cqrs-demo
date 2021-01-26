@@ -5,6 +5,7 @@ import cz.malanius.escqrs.escqrsdemo.projections.UserContacts;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -12,6 +13,6 @@ import java.util.UUID;
 @Data
 @Component
 public class UserReadRepository {
-    private Map<UUID, UserAddresses> userAddresses;
-    private Map<UUID, UserContacts> userContacts;
+    private Map<UUID, UserAddresses> userAddresses = new HashMap<>();
+    private Map<UUID, UserContacts> userContacts = new HashMap<>();
 }

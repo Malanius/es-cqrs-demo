@@ -8,6 +8,7 @@ import cz.malanius.escqrs.escqrsdemo.model.converters.ContactConverter;
 import cz.malanius.escqrs.escqrsdemo.model.converters.UserConverter;
 import cz.malanius.escqrs.escqrsdemo.model.dto.UserDTO;
 import cz.malanius.escqrs.escqrsdemo.model.entities.UserEntity;
+import cz.malanius.escqrs.escqrsdemo.projections.UserProjector;
 import cz.malanius.escqrs.escqrsdemo.repository.UserWriteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,10 +20,12 @@ import java.util.stream.Collectors;
 public class UserAggregate {
 
     private final UserWriteRepository writeRepository;
+    private final UserProjector userProjector;
 
     @Autowired
-    public UserAggregate(UserWriteRepository writeRepository) {
+    public UserAggregate(UserWriteRepository writeRepository, UserProjector userProjector) {
         this.writeRepository = writeRepository;
+        this.userProjector = userProjector;
     }
 
     public UserDTO handleCreateUserCommand(CreateUserCommand command) {
@@ -31,7 +34,9 @@ public class UserAggregate {
                 .lastName(command.getLastName())
                 .build();
         UserEntity user = writeRepository.save(userEntity);
-        return UserConverter.convert(user);
+        UserDTO converted = UserConverter.convert(user);
+        userProjector.project(converted);
+        return converted;
     }
 
     public UserDTO handleUpdateUserCommand(UpdateUserCommand command) {
@@ -42,7 +47,9 @@ public class UserAggregate {
             if (command.getContacts() != null)
                 u.setContacts(command.getContacts().stream().map(ContactConverter::convert).collect(Collectors.toSet()));
             UserEntity saved = writeRepository.save(u);
-            return UserConverter.convert(saved);
+            UserDTO converted = UserConverter.convert(saved);
+            userProjector.project(converted);
+            return converted;
         }).orElseThrow();
     }
 

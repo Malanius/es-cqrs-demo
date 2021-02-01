@@ -30,8 +30,8 @@ public class UserUtility {
         if (event instanceof UserAddressAddedEvent) {
             return applyUserAddressAdded(user, (UserAddressAddedEvent) event);
         }
-        if (event instanceof UserAddressRemoved) {
-            return applyUserAddressRemoved(user, (UserAddressRemoved) event);
+        if (event instanceof UserAddressRemovedEvent) {
+            return applyUserAddressRemoved(user, (UserAddressRemovedEvent) event);
         }
         if (event instanceof UserContactAddedEvent) {
             return applyUSerContactAdded(user, (UserContactAddedEvent) event);
@@ -64,7 +64,7 @@ public class UserUtility {
                 .build();
     }
 
-    private static UserDTO applyUserAddressRemoved(UserDTO user, UserAddressRemoved event) {
+    private static UserDTO applyUserAddressRemoved(UserDTO user, UserAddressRemovedEvent event) {
         Set<AddressDTO> addresses = new HashSet<>(user.getAddresses());
         AddressDTO removed = AddressDTO.builder()
                 .city(event.getCity())

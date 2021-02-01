@@ -54,7 +54,7 @@ public class UserService {
         user.getAddresses().stream()
                 .filter(a -> !addresses.contains(a))
                 .forEach(a -> store.addEvent(
-                        userId, UserAddressRemoved.builder()
+                        userId, UserAddressRemovedEvent.builder()
                                 .city(a.getCity())
                                 .state(a.getState())
                                 .postCode(a.getPostcode())

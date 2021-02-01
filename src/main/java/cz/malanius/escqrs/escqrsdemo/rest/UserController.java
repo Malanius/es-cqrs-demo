@@ -1,22 +1,14 @@
 package cz.malanius.escqrs.escqrsdemo.rest;
 
 import cz.malanius.escqrs.escqrsdemo.aggregates.UserAggregate;
-import cz.malanius.escqrs.escqrsdemo.commands.CreateUserCommand;
-import cz.malanius.escqrs.escqrsdemo.commands.DeleteUserCommand;
-import cz.malanius.escqrs.escqrsdemo.commands.UpdateUserCommand;
 import cz.malanius.escqrs.escqrsdemo.model.dto.AddressDTO;
 import cz.malanius.escqrs.escqrsdemo.model.dto.ContactDTO;
 import cz.malanius.escqrs.escqrsdemo.model.dto.UserDTO;
-import cz.malanius.escqrs.escqrsdemo.model.entities.UserEntity;
 import cz.malanius.escqrs.escqrsdemo.projections.UserProjection;
-import cz.malanius.escqrs.escqrsdemo.queries.AddressByRegionQuery;
-import cz.malanius.escqrs.escqrsdemo.queries.ContactByTypeQuery;
 import cz.malanius.escqrs.escqrsdemo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,78 +17,49 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService users;
-    private final UserAggregate userAggregate;
-    private final UserProjection userProjection;
 
     @Autowired
     public UserController(UserService users, UserAggregate userAggregate, UserProjection userProjection) {
         this.users = users;
-        this.userAggregate = userAggregate;
-        this.userProjection = userProjection;
     }
 
     @GetMapping
-    public Set<UserEntity> listUsers() {
+    public Set<UserDTO> listUsers() {
         return users.getAllUsers();
     }
 
     @PostMapping("/user")
     public UserDTO createUser(@RequestBody UserDTO user) {
-        CreateUserCommand command = CreateUserCommand.builder()
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .build();
-        return userAggregate.handleCreateUserCommand(command);
+        return users.createUser(user);
     }
 
-    @GetMapping("/user/{id}")
-    public ResponseEntity<UserEntity> getUser(@PathVariable UUID id) {
-        Optional<UserEntity> maybeUser = users.getUser(id);
-        return maybeUser.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    @GetMapping("/user/{userId}")
+    public UserDTO getUser(@PathVariable UUID userId) {
+        return users.getUser(userId);
     }
 
-    @DeleteMapping("/user/{id}")
-    public void deleteUSer(@PathVariable UUID id) {
-        DeleteUserCommand command = DeleteUserCommand.builder()
-                .userId(id)
-                .build();
-        userAggregate.handleDeleteUserCommand(command);
+    @DeleteMapping("/user/{userId}")
+    public void deleteUSer(@PathVariable UUID userId) {
+        users.deleteUser(userId);
     }
 
-    @PostMapping("/user/{id}/addresses")
-    public UserDTO setUserAddress(@PathVariable UUID id, @RequestBody Set<AddressDTO> addresses) {
-        UpdateUserCommand command = UpdateUserCommand.builder()
-                .userId(id)
-                .addresses(addresses)
-                .build();
-        return userAggregate.handleUpdateUserCommand(command);
+    @PostMapping("/user/{userId}/addresses")
+    public UserDTO setUserAddress(@PathVariable UUID userId, @RequestBody Set<AddressDTO> addresses) {
+        return users.updateUserAdresses(userId, addresses);
     }
 
-    @PostMapping("/user/{id}/contacts")
-    public UserDTO updateUserContacts(@PathVariable UUID id, @RequestBody Set<ContactDTO> contacts) {
-        UpdateUserCommand command = UpdateUserCommand.builder()
-                .userId(id)
-                .contacts(contacts)
-                .build();
-        return userAggregate.handleUpdateUserCommand(command);
+    @PostMapping("/user/{userId}/contacts")
+    public UserDTO updateUserContacts(@PathVariable UUID userId, @RequestBody Set<ContactDTO> contacts) {
+        return users.updateUserContacts(userId, contacts);
     }
 
-    @GetMapping("/user/{id}/contacts/{type}")
-    public Set<ContactDTO> getUserContactsOfType(@PathVariable UUID id, @PathVariable String type) {
-        ContactByTypeQuery query = ContactByTypeQuery.builder()
-                .userId(id)
-                .contactType(type)
-                .build();
-        return userProjection.handle(query);
+    @GetMapping("/user/{userId}/contacts/{type}")
+    public Set<ContactDTO> getUserContactsOfType(@PathVariable UUID userId, @PathVariable String type) {
+        return users.getContactsOfType(userId, type);
     }
 
-    @GetMapping("/user/{id}/addresses/{region}")
-    public Set<AddressDTO> getUserAddressesForRegion(@PathVariable UUID id, @PathVariable String region) {
-        AddressByRegionQuery query = AddressByRegionQuery.builder()
-                .userId(id)
-                .state(region)
-                .build();
-        return userProjection.handle(query);
+    @GetMapping("/user/{userId}/addresses/{region}")
+    public Set<AddressDTO> getUserAddressesForRegion(@PathVariable UUID userId, @PathVariable String region) {
+        return users.getAddressesForRegion(userId, region);
     }
 }

@@ -23,17 +23,15 @@ import java.util.stream.Collectors;
 public class UserAggregate {
 
     private final EventStore store;
-    private final UserProjector userProjector;
 
     @Autowired
     public UserAggregate(EventStore store, UserProjector userProjector) {
         this.store = store;
-        this.userProjector = userProjector;
     }
 
     public List<Event> handleCreateUserCommand(CreateUserCommand command) {
         UserCreatedEvent event = UserCreatedEvent.builder()
-                .userId(UUID.randomUUID())
+                .userId(command.getUserId())
                 .firstName(command.getFirstName())
                 .lastName(command.getLastName())
                 .build();

@@ -45,7 +45,7 @@ public class UserController {
 
     @PostMapping("/user/{userId}/addresses")
     public UserDTO setUserAddress(@PathVariable UUID userId, @RequestBody Set<AddressDTO> addresses) {
-        return users.updateUserAdresses(userId, addresses);
+        return users.updateUserAddresses(userId, addresses);
     }
 
     @PostMapping("/user/{userId}/contacts")
